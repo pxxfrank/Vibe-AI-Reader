@@ -33,6 +33,17 @@ export function registerKnowledgeTreeHandlers(): void {
     return treeId
   })
 
+  ipcMain.handle('tree:listAll', async () => {
+    const rows = queryAll(
+      `SELECT kt.id, kt.document_id, kt.title, kt.created_at,
+              d.title as document_title
+       FROM knowledge_trees kt
+       LEFT JOIN documents d ON kt.document_id = d.id
+       ORDER BY kt.created_at DESC`
+    )
+    return rows
+  })
+
   ipcMain.handle('tree:listByDocument', async (_event, documentId: number) => {
     const rows = queryAll(
       'SELECT id, document_id, title, created_at FROM knowledge_trees WHERE document_id = ? ORDER BY created_at DESC',

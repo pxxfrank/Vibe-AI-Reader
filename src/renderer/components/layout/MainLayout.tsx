@@ -1,24 +1,31 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Library, BookOpen, Settings, Sun, Moon } from 'lucide-react'
+import { Library, GitBranch, Settings, Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useThemeStore, type Theme } from '@/stores/theme-store'
 
 const navItems = [
   { to: '/', icon: Library, label: '书架' },
-  { to: '/settings', icon: Settings, label: '设置' }
+  { to: '/knowledge', icon: GitBranch, label: '知识树' },
+  { to: '/settings', icon: Settings, label: '设置' },
 ]
 
 const themeNext: Record<Theme, Theme> = {
   light: 'dark',
   dark: 'sepia',
-  sepia: 'light'
+  sepia: 'light',
 }
 
 const themeIcons: Record<Theme, React.ReactNode> = {
   light: <Sun className="h-4 w-4" />,
   dark: <Moon className="h-4 w-4" />,
-  sepia: <Sun className="h-4 w-4 text-amber-600" />
+  sepia: <Sun className="h-4 w-4 text-amber-500" />,
+}
+
+const themeLabels: Record<Theme, string> = {
+  light: '浅色',
+  dark: '深色',
+  sepia: '护眼',
 }
 
 interface MainLayoutProps {
@@ -31,31 +38,34 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Sidebar */}
       <aside
         className={cn(
-          'flex flex-col border-r border-white/10 bg-background/40 backdrop-blur-xl transition-all duration-200',
-          collapsed ? 'w-14' : 'w-52'
+          'flex flex-col border-r border-border bg-surface shrink-0 transition-all duration-200',
+          collapsed ? 'w-14' : 'w-[220px]',
         )}
       >
-        <div className="flex h-12 items-center justify-center border-b">
-          {collapsed ? (
-            <BookOpen className="h-5 w-5" />
-          ) : (
-            <span className="font-semibold text-sm">AI Reader</span>
-          )}
+        {/* Logo */}
+        <div className="flex h-14 items-center gap-3 border-b border-border px-5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+            <span className="text-xs font-semibold tracking-tight text-primary-foreground">R</span>
+          </div>
+          {!collapsed && <span className="text-sm font-semibold tracking-tight">AI Reader</span>}
         </div>
-        <nav className="flex-1 p-2 space-y-1">
+
+        {/* Nav items */}
+        <nav className="flex-1 space-y-1 px-3 py-4">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all duration-200',
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   collapsed && 'justify-center px-2',
                   isActive
-                    ? 'bg-gradient-to-r from-[#667eea]/15 to-[#764ba2]/15 text-brand font-medium shadow-[inset_0_1px_0_rgba(102,126,234,0.1)]'
-                    : 'text-muted-foreground hover:bg-brand-light/30 hover:text-brand'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
                 )
               }
             >
@@ -64,30 +74,35 @@ export function MainLayout({ children }: MainLayoutProps) {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t p-2 space-y-1">
+
+        {/* Bottom controls */}
+        <div className="space-y-1 border-t border-border p-2">
           <button
             onClick={() => setTheme(themeNext[theme])}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-xs w-full transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-              collapsed && 'justify-center px-2'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground',
+              collapsed && 'justify-center px-2',
             )}
+            title={`当前: ${themeLabels[theme]}`}
           >
             {themeIcons[theme]}
-            {!collapsed && <span>主题</span>}
+            {!collapsed && <span>{themeLabels[theme]}</span>}
           </button>
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-xs w-full transition-colors text-muted-foreground hover:bg-accent',
-              collapsed && 'justify-center px-2'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary',
+              collapsed && 'justify-center px-2',
             )}
           >
-            {collapsed ? <span>→</span> : <span>←</span>}
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!collapsed && <span>收起</span>}
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-hidden">{children}</main>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-hidden bg-background">{children}</main>
     </div>
   )
 }

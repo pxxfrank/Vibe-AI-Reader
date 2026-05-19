@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { Plus, ChevronRight, ChevronDown, Circle, CheckCircle2, HelpCircle, Trash2, Copy } from 'lucide-react'
+import { Plus, ChevronRight, Circle, CheckCircle2, HelpCircle, Trash2, Copy } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useKnowledgeTreeStore } from '@/stores/knowledge-tree-store'
@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils'
 import type { TreeNode } from '@/types/knowledge-tree'
 
 const statusIcons: Record<string, React.ReactNode> = {
-  pending: <Circle className="h-4 w-4 text-red-400" />,
-  answered: <HelpCircle className="h-4 w-4 text-blue-400" />,
-  resolved: <CheckCircle2 className="h-4 w-4 text-green-400" />
+  pending: <Circle className="h-3.5 w-3.5 text-red-400" />,
+  answered: <HelpCircle className="h-3.5 w-3.5 text-blue-400" />,
+  resolved: <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />,
 }
 
 export function KnowledgeTreePanel() {
@@ -73,18 +73,18 @@ export function KnowledgeTreePanel() {
   }
 
   return (
-    <div className="flex h-full border-l">
+    <div className="flex h-full border-l border-border">
       {/* Tree sidebar */}
-      <div className="w-56 border-r border-border/40 flex flex-col bg-background/80">
-        <div className="p-3 border-b">
+      <div className="w-48 shrink-0 border-r border-border flex flex-col bg-surface">
+        <div className="px-3 py-3 border-b border-border">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-muted-foreground">知识探索</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">知识探索</span>
             <button
               onClick={() => setShowNewTreeInput(!showNewTreeInput)}
-              className="p-1 rounded-full hover:bg-accent"
+              className="p-1 rounded-md hover:bg-secondary transition-colors"
               title="新建知识树"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
           {showNewTreeInput && (
@@ -95,24 +95,26 @@ export function KnowledgeTreePanel() {
                 onChange={(e) => setNewTreeTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateTree()}
                 placeholder="知识树标题..."
-                className="flex-1 rounded-full border bg-background px-2 py-1 text-xs"
+                className="flex-1 rounded-lg border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                 autoFocus
               />
             </div>
           )}
         </div>
 
-        <div className="flex-1 overflow-auto p-2">
+        <div className="flex-1 overflow-auto py-2">
           {trees.length === 0 ? (
-            <p className="text-xs text-muted-foreground p-2">暂无知识树</p>
+            <p className="text-xs text-muted-foreground px-3 py-4 text-center">暂无知识树</p>
           ) : (
             trees.map(tree => (
               <div
                 key={tree.id}
                 onClick={() => loadTree(tree.id)}
                 className={cn(
-                  'group flex items-center justify-between rounded-full px-2 py-1.5 text-xs cursor-pointer hover:bg-accent',
-                  currentTree?.id === tree.id && 'bg-accent'
+                  'group flex items-center justify-between rounded-lg mx-2 px-2 py-1.5 text-xs cursor-pointer transition-colors',
+                  currentTree?.id === tree.id
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-secondary',
                 )}
               >
                 {renamingTreeId === tree.id ? (
@@ -127,7 +129,7 @@ export function KnowledgeTreePanel() {
                     }}
                     onBlur={handleRenameSubmit}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex-1 rounded-full border bg-background px-1 py-0 text-xs"
+                    className="flex-1 rounded border bg-background px-1 py-0 text-xs focus:outline-none"
                   />
                 ) : (
                   <span
@@ -143,7 +145,7 @@ export function KnowledgeTreePanel() {
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); deleteTree(tree.id) }}
-                  className="p-0.5 opacity-0 group-hover:opacity-100 hover:text-red-500"
+                  className="p-0.5 opacity-0 group-hover:opacity-100 hover:text-red-500 shrink-0 transition-opacity"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -153,26 +155,31 @@ export function KnowledgeTreePanel() {
         </div>
 
         {currentTree && (
-          <>
-            <div className="border-t p-2">
-              <button onClick={handleExport} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground w-full">
-                <Copy className="h-3.5 w-3.5" /> 复制 Markdown
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto border-t">
-              <TreeNodeList
-                nodes={currentTree.nodes}
-                selectedNodeId={selectedNodeId}
-                onSelect={selectNode}
-                level={0}
-              />
-            </div>
-          </>
+          <div className="border-t border-border px-3 py-2">
+            <button onClick={handleExport} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full">
+              <Copy className="h-3.5 w-3.5" /> 复制 Markdown
+            </button>
+          </div>
         )}
       </div>
 
+      {/* Node list sidebar */}
+      {currentTree && (
+        <div className="w-48 shrink-0 border-r border-border overflow-auto py-2 bg-surface/50">
+          <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            探索节点
+          </div>
+          <TreeNodeList
+            nodes={currentTree.nodes}
+            selectedNodeId={selectedNodeId}
+            onSelect={selectNode}
+            level={0}
+          />
+        </div>
+      )}
+
       {/* Node detail panel */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-background">
         {!selectedNode ? (
           <div className="flex-1 flex items-center justify-center text-muted-foreground p-6 text-center">
             <div>
@@ -184,35 +191,35 @@ export function KnowledgeTreePanel() {
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Question header */}
-            <div className="p-4 border-b border-border/40 bg-background/80">
+            <div className="p-5 border-b border-border">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="text-base font-medium flex-1 leading-relaxed">
+                <h3 className="text-sm font-semibold leading-relaxed flex-1">
                   <span className="text-primary font-bold">Q:</span> {selectedNode.question}
                 </h3>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => updateNodeStatus(selectedNode.id, 'resolved')}
                     className={cn(
-                      'p-1.5 rounded-full',
+                      'p-1.5 rounded-md transition-colors',
                       selectedNode.status === 'resolved'
-                        ? 'bg-green-100 text-green-600'
-                        : 'hover:bg-green-50 text-muted-foreground'
+                        ? 'bg-green-50 text-green-600'
+                        : 'text-muted-foreground hover:bg-green-50 hover:text-green-600'
                     )}
                     title="标记为已解决"
                   >
-                    <CheckCircle2 className="h-5 w-5" />
+                    <CheckCircle2 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => deleteNode(selectedNode.id)}
-                    className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
                     title="删除节点"
                   >
-                    <Trash2 className="h-5 w-5" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
               {selectedNode.selected_text && (
-                <div className="mt-3 text-xs text-muted-foreground bg-muted/50 rounded-full p-2.5">
+                <div className="mt-3 text-xs text-muted-foreground bg-muted rounded-lg p-2.5">
                   关联文本: "{selectedNode.selected_text.slice(0, 200)}{selectedNode.selected_text.length > 200 ? '...' : ''}"
                 </div>
               )}
@@ -221,15 +228,15 @@ export function KnowledgeTreePanel() {
             {/* Answer area */}
             <div className="flex-1 overflow-auto p-5">
               {selectedNode.id === streamingNodeId ? (
-                <div className="markdown-content">
+                <div className="markdown-content text-sm">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {streamingContent || '思考中...'}
                   </ReactMarkdown>
-                  <span className="inline-block w-2.5 h-5 bg-primary animate-pulse align-middle ml-0.5 rounded-sm" />
+                  <span className="inline-block w-2 h-4 bg-primary animate-pulse align-middle ml-0.5 rounded-sm" />
                 </div>
               ) : selectedNode.answer ? (
                 <div
-                  className="markdown-content"
+                  className="markdown-content text-sm"
                   onMouseUp={() => {
                     const sel = window.getSelection()
                     if (sel && sel.toString().trim()) {
@@ -255,17 +262,18 @@ export function KnowledgeTreePanel() {
               )}
             </div>
 
-            {/* Follow-up input - bigger */}
+            {/* Follow-up input */}
             {selectedNode.status !== 'pending' && (
-              <div className="p-4 border-t border-border/40 bg-background/80">
+              <div className="p-4 border-t border-border bg-surface/50">
                 {selectedTextForFollowUp && (
-                  <div className="text-xs text-muted-foreground mb-2 p-2 bg-background rounded-full border">
+                  <div className="text-xs text-muted-foreground mb-2 p-2 bg-surface rounded-lg border">
                     <span className="font-medium">追问引用:</span> "{selectedTextForFollowUp.slice(0, 150)}{selectedTextForFollowUp.length > 150 ? '...' : ''}"
                     <button onClick={() => setSelectedTextForFollowUp('')} className="ml-2 hover:text-foreground font-bold">×</button>
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <textarea
+                  <input
+                    type="text"
                     value={followUpQuestion}
                     onChange={(e) => setFollowUpQuestion(e.target.value)}
                     onKeyDown={(e) => {
@@ -275,13 +283,12 @@ export function KnowledgeTreePanel() {
                       }
                     }}
                     placeholder={selectedTextForFollowUp ? '针对选中内容继续追问...' : '继续追问，深入理解...'}
-                    className="flex-1 rounded-full border bg-background px-3 py-2.5 text-sm resize-none"
-                    rows={3}
+                    className="flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                   />
                   <button
                     onClick={handleFollowUp}
                     disabled={!followUpQuestion.trim()}
-                    className="btn-brand self-end text-sm disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    className="btn-brand text-sm shrink-0 disabled:opacity-40 disabled:hover:brightness-100"
                   >
                     追问
                   </button>
@@ -324,20 +331,21 @@ function TreeNodeItem({ node, selectedNodeId, onSelect, level }: {
       <div
         onClick={() => onSelect(node.id)}
         className={cn(
-          'flex items-center gap-1.5 py-1.5 px-2 cursor-pointer text-xs hover:bg-accent rounded-sm',
-          selectedNodeId === node.id && 'bg-accent font-medium'
+          'flex items-center gap-1.5 py-1.5 px-3 cursor-pointer text-xs transition-colors hover:bg-secondary rounded-md mx-1',
+          selectedNodeId === node.id && 'bg-primary/10 text-primary font-medium',
+          selectedNodeId !== node.id && 'text-foreground',
         )}
         style={{ paddingLeft: `${level * 14 + 8}px` }}
       >
         {hasChildren ? (
           <button onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }} className="p-0.5 shrink-0">
-            {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', expanded && 'rotate-90')} />
           </button>
         ) : (
           <span className="w-5" />
         )}
         {statusIcons[node.status]}
-        <span className="truncate flex-1">{node.question.slice(0, 35)}{node.question.length > 35 ? '...' : ''}</span>
+        <span className="truncate flex-1">{node.question.slice(0, 30)}{node.question.length > 30 ? '...' : ''}</span>
       </div>
       {expanded && hasChildren && (
         <TreeNodeList nodes={node.children!} selectedNodeId={selectedNodeId} onSelect={onSelect} level={level + 1} />

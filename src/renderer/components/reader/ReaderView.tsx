@@ -30,7 +30,6 @@ export function ReaderView() {
     }
   }, [documentId, openDocument])
 
-  // Auto-switch to PDF view for documents with no text content
   useEffect(() => {
     if (currentDocument && currentDocument.file_type === 'pdf') {
       const hasContent = currentDocument.chapters.some(ch => ch.content && ch.content.length > 10)
@@ -55,7 +54,6 @@ export function ReaderView() {
     return () => el.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
 
-  // Resizable divider logic
   const onResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     resizeRef.current = { startX: e.clientX, startWidth: aiPanelWidth }
@@ -76,12 +74,13 @@ export function ReaderView() {
     document.removeEventListener('mouseup', onResizeEnd)
   }, [onResizeMove])
 
-  // Handle text selection for AI questions
   const handleTextSelection = useCallback(() => {
-    const selection = window.getSelection()
-    if (selection && selection.toString().trim().length > 0) {
-      setSelectedText(selection.toString().trim())
-    }
+    setTimeout(() => {
+      const selection = window.getSelection()
+      if (selection && selection.toString().trim().length > 0) {
+        setSelectedText(selection.toString().trim())
+      }
+    }, 100)
   }, [])
 
   const handleAskAI = async () => {
@@ -150,91 +149,105 @@ export function ReaderView() {
     'flex flex-col flex-1 min-w-0',
     theme === 'dark' && 'bg-gray-900 text-gray-100',
     theme === 'sepia' && 'bg-amber-50 text-amber-950',
-    theme === 'light' && 'bg-white text-gray-900'
+    theme === 'light' && 'bg-white text-foreground'
   )
 
   return (
     <div className="flex h-full">
       {/* Reading area */}
       <div className={readerBgClass}>
-        {/* Toolbar - sticky so content scrolls behind, making blur visible */}
-        <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-2 border-b border-white/20 bg-background/40 backdrop-blur-xl shadow-sm">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 rounded-full hover:bg-brand-light/50 transition-colors"
-            title="返回书架"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-
-          <span className="font-medium text-sm flex-1 truncate">
-            {currentDocument.title}
-          </span>
-
-          <div className="flex items-center gap-1">
+        {/* Toolbar */}
+        <div className="sticky top-0 z-20 glass-panel bg-background/70">
+          <div className="flex items-center gap-3 px-6 py-3">
             <button
-              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-              className="p-1.5 rounded hover:bg-muted/50 transition-colors"
-              title="减小字号"
+              onClick={() => navigate('/')}
+              className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground"
+              title="返回书架"
             >
-              <Minus className="h-3.5 w-3.5" />
+              <ArrowLeft className="h-4 w-4" />
             </button>
-            <span className="text-xs w-8 text-center">{fontSize}</span>
-            <button
-              onClick={() => setFontSize(Math.min(28, fontSize + 2))}
-              className="p-1.5 rounded hover:bg-muted/50 transition-colors"
-              title="增大字号"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </button>
-          </div>
 
-          {currentDocument.file_type === 'pdf' && (
-            <button
-              onClick={() => setViewMode(viewMode === 'text' ? 'pdf' : 'text')}
-              className={cn(
-                'p-2 rounded-full transition-all duration-200 text-xs flex items-center gap-1',
-                viewMode === 'pdf' ? 'bg-brand-light text-brand font-medium' : 'hover:bg-muted/50'
-              )}
-              title={viewMode === 'text' ? '切换到PDF原版视图' : '切换到文本视图'}
-            >
-              {viewMode === 'text' ? <Image className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-            </button>
-          )}
+            <span className="font-medium text-sm flex-1 truncate">
+              {currentDocument.title}
+            </span>
 
-          <button
-            onClick={() => setShowAIPanel(!showAIPanel)}
-            className={cn(
-              'p-2 rounded-full transition-all duration-200',
-              showAIPanel
-                ? 'bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white shadow-[0_2px_10px_rgba(102,126,234,0.4)]'
-                : 'hover:bg-brand-light/50 text-muted-foreground'
+            {currentDocument.file_type === 'pdf' && (
+              <div className="flex items-center gap-0.5 bg-secondary rounded-lg p-0.5">
+                <button
+                  onClick={() => setViewMode('text')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md text-xs font-medium transition-all',
+                    viewMode === 'text' ? 'bg-surface text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  文本
+                </button>
+                <button
+                  onClick={() => setViewMode('pdf')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md text-xs font-medium transition-all',
+                    viewMode === 'pdf' ? 'bg-surface text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  原版
+                </button>
+              </div>
             )}
-            title="AI 知识树"
-          >
-            {showAIPanel ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
-          </button>
-        </div>
 
-        {/* Chapter navigation */}
-        {currentDocument.chapters.length > 1 && (
-          <div className="sticky top-[41px] z-10 flex items-center gap-2 px-4 py-1.5 border-b border-white/10 bg-background/40 backdrop-blur-xl overflow-x-auto shadow-sm">
-            {currentDocument.chapters.map((ch, idx) => (
+            <div className="w-px h-5 bg-border mx-1" />
+
+            <div className="flex items-center gap-1">
               <button
-                key={idx}
-                onClick={() => setCurrentChapterIdx(idx)}
-                className={cn(
-                  'whitespace-nowrap text-xs px-2.5 py-1 rounded transition-colors',
-                  idx === currentChapterIdx
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-muted/50'
-                )}
+                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground transition-colors"
+                title="减小字号"
               >
-                {ch.chapter_title || `章节 ${idx + 1}`}
+                <Minus className="h-3.5 w-3.5" />
               </button>
-            ))}
+              <span className="text-xs text-muted-foreground w-8 text-center tabular-nums">{fontSize}</span>
+              <button
+                onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+                className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground transition-colors"
+                title="增大字号"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowAIPanel(!showAIPanel)}
+              className={cn(
+                'p-2 rounded-lg transition-colors',
+                showAIPanel
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-secondary',
+              )}
+              title="AI 知识树"
+            >
+              {showAIPanel ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+            </button>
           </div>
-        )}
+
+          {/* Chapter tabs */}
+          {currentDocument.chapters.length > 1 && (
+            <div className="flex gap-1 px-6 pb-3 overflow-x-auto">
+              {currentDocument.chapters.map((ch, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentChapterIdx(idx)}
+                  className={cn(
+                    'whitespace-nowrap text-xs px-3 py-1.5 rounded-lg font-medium transition-colors',
+                    idx === currentChapterIdx
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+                  )}
+                >
+                  {ch.chapter_title || `章节 ${idx + 1}`}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Content area */}
         {viewMode === 'pdf' && currentDocument.file_type === 'pdf' ? (
@@ -244,27 +257,27 @@ export function ReaderView() {
         ) : (
           <div
             ref={contentRef}
-            className="flex-1 overflow-auto px-8 py-6"
+            className="flex-1 overflow-auto px-8 py-8"
             onMouseUp={handleTextSelection}
           >
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto reader-content">
               {!chapter ? (
                 <div className="text-center text-muted-foreground py-12">
                   <p className="text-lg mb-2">暂无内容</p>
                   <p className="text-sm">
                     {currentDocument.chapters.length === 0
-                      ? '文档没有可读取的文本内容（可能是扫描版 PDF）。请点击上方 <原版> 按钮查看 PDF 页面。'
+                      ? '文档没有可读取的文本内容（可能是扫描版 PDF）。请点击上方 "原版" 按钮查看 PDF 页面。'
                       : '请从上方选择章节开始阅读'}
                   </p>
                 </div>
               ) : (
                 <div style={{ fontSize: `${fontSize}px` }}>
                   {chapter.chapter_title && (
-                    <h2 className="text-xl font-bold text-center mb-6">{chapter.chapter_title}</h2>
+                    <h2 className="text-2xl font-semibold tracking-tight text-center mb-8">{chapter.chapter_title}</h2>
                   )}
                   {chapter.content ? (
                     chapter.content.split('\n').filter(p => p.trim()).map((paragraph, i) => (
-                      <p key={i} className="mb-4 text-justify leading-relaxed">
+                      <p key={i} className="mb-5 leading-relaxed">
                         {paragraph}
                       </p>
                     ))
@@ -279,41 +292,41 @@ export function ReaderView() {
 
         {/* Selection bar */}
         {selectedText && (
-          <div className="sticky bottom-0 z-20 px-4 py-2 border-t border-white/20 flex items-center gap-3 bg-background/40 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+          <div className="sticky bottom-0 z-20 glass-panel border-t border-border px-6 py-3 flex items-center gap-3">
             <span className="text-xs text-muted-foreground truncate flex-1">
               已选中: "{selectedText.slice(0, 80)}{selectedText.length > 80 ? '...' : ''}"
             </span>
             <button
               onClick={handleAskAI}
-              className="btn-brand inline-flex items-center gap-1.5 text-xs px-4 py-1.5"
+              className="btn-brand text-xs py-1.5"
             >
               <MessageSquare className="h-3.5 w-3.5" />
               AI 提问
             </button>
             <button
               onClick={() => setSelectedText('')}
-              className="text-xs text-muted-foreground hover:text-foreground"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               取消
             </button>
           </div>
         )}
 
-        {/* Footer progress */}
-        <div className="sticky bottom-0 px-4 py-1.5 border-t border-white/10 text-xs text-muted-foreground bg-background/40 backdrop-blur-xl">
+        {/* Footer */}
+        <div className="sticky bottom-0 glass-panel border-t border-border px-6 py-2 text-xs text-muted-foreground">
           章节 {currentChapterIdx + 1}/{currentDocument.chapters.length}
+          {currentDocument.total_pages > 0 && ` · 进度 ${Math.round((currentDocument.current_page / currentDocument.total_pages) * 100)}%`}
         </div>
       </div>
 
       {/* Resizable divider + AI panel */}
       {showAIPanel && (
         <>
-          {/* Drag handle */}
           <div
             onMouseDown={onResizeStart}
-            className="w-1.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 transition-colors active:bg-primary/50"
+            className="w-1.5 bg-border hover:bg-primary/30 cursor-col-resize shrink-0 transition-colors active:bg-primary/50"
           />
-          <div style={{ width: aiPanelWidth }} className="flex-shrink-0">
+          <div style={{ width: aiPanelWidth }} className="shrink-0">
             <KnowledgeTreePanel />
           </div>
         </>

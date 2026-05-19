@@ -14,12 +14,14 @@ export interface KnowledgeTreeFull extends KnowledgeTreeInfo {
 
 interface KnowledgeTreeState {
   trees: KnowledgeTreeInfo[]
+  allTrees: (KnowledgeTreeInfo & { document_title?: string })[]
   currentTree: KnowledgeTreeFull | null
   selectedNodeId: number | null
   streamingNodeId: number | null
   streamingContent: string
   loading: boolean
 
+  fetchAllTrees: () => Promise<void>
   fetchTrees: (documentId: number) => Promise<void>
   createTree: (documentId: number | null, title: string) => Promise<number>
   renameTree: (treeId: number, title: string) => Promise<void>
@@ -42,11 +44,17 @@ let streamCleanup: (() => void) | null = null
 
 export const useKnowledgeTreeStore = create<KnowledgeTreeState>((set, get) => ({
   trees: [],
+  allTrees: [],
   currentTree: null,
   selectedNodeId: null,
   streamingNodeId: null,
   streamingContent: '',
   loading: false,
+
+  fetchAllTrees: async () => {
+    const rows = await window.electronAPI.invoke('tree:listAll') as (KnowledgeTreeInfo & { document_title?: string })[]
+    set({ allTrees: rows })
+  },
 
   fetchTrees: async (documentId) => {
     const trees = await window.electronAPI.invoke('tree:listByDocument', documentId) as KnowledgeTreeInfo[]
