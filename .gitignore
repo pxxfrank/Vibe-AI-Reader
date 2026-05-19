@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files (just in case)
+.env
+.env.*
+!.env.example
+
+# Claude Code (local config)
+.claude/
+
+# Database files (just in case)
+*.db
+*.sqlite
+
+# Test documents
+test_data/
+测试文档*

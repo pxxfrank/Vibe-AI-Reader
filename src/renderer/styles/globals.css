@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 5% 15%;
+    --primary: 250 70% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 250 40% 96%;
+    --secondary-foreground: 250 30% 25%;
+    --muted: 250 20% 95%;
+    --muted-foreground: 250 10% 50%;
+    --accent: 250 50% 94%;
+    --accent-foreground: 250 40% 30%;
+    --border: 250 20% 88%;
+    --input: 250 20% 88%;
+    --ring: 250 70% 58%;
+    --radius: 0.75rem;
+    --brand-from: #667eea;
+    --brand-to: #764ba2;
+  }
+
+  .dark {
+    --background: 240 10% 6%;
+    --foreground: 250 20% 92%;
+    --primary: 250 70% 65%;
+    --primary-foreground: 240 10% 6%;
+    --secondary: 240 10% 14%;
+    --secondary-foreground: 250 20% 92%;
+    --muted: 240 10% 14%;
+    --muted-foreground: 250 15% 55%;
+    --accent: 250 30% 18%;
+    --accent-foreground: 250 20% 92%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --ring: 250 70% 65%;
+  }
+
+  .sepia {
+    --background: 40 30% 94%;
+    --foreground: 30 30% 18%;
+    --primary: 250 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 20% 86%;
+    --secondary-foreground: 30 30% 18%;
+    --muted: 40 20% 88%;
+    --muted-foreground: 30 15% 40%;
+    --accent: 250 30% 90%;
+    --accent-foreground: 250 40% 30%;
+    --border: 30 15% 74%;
+    --input: 30 15% 74%;
+    --ring: 250 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+  .glass { @apply backdrop-blur-xl bg-background/40 border border-white/20; }
+  .glass-light { @apply backdrop-blur-md bg-background/30; }
+  .glass-strong { @apply backdrop-blur-2xl bg-background/50 border border-white/20 shadow-2xl; }
+
+  .btn-brand {
+    @apply bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-medium
+           rounded-full px-5 py-2.5 shadow-[0_4px_15px_rgba(102,126,234,0.35)]
+           hover:shadow-[0_6px_20px_rgba(102,126,234,0.45)] hover:translate-y-[-1px]
+           active:translate-y-0 transition-all duration-200;
+  }
+
+  .btn-glass {
+    @apply glass rounded-full px-4 py-2 text-sm font-medium
+           hover:bg-background/60 hover:shadow-md transition-all duration-200;
+  }
+
+  .card-glass {
+    @apply rounded-2xl border border-white/20 bg-background/40 backdrop-blur-xl
+           shadow-[0_8px_32px_rgba(102,126,234,0.1)]
+           hover:shadow-[0_12px_40px_rgba(102,126,234,0.18)] hover:translate-y-[-2px]
+           transition-all duration-300;
+  }
+}
+
+/* Markdown content styling */
+.markdown-content h1 { @apply text-lg font-bold mt-4 mb-2; }
+.markdown-content h2 { @apply text-base font-bold mt-3 mb-2; }
+.markdown-content h3 { @apply text-sm font-semibold mt-3 mb-1.5; }
+.markdown-content h4 { @apply text-sm font-medium mt-2 mb-1; }
+.markdown-content p { @apply mb-3 leading-relaxed; }
+.markdown-content ul { @apply list-disc pl-5 mb-3; }
+.markdown-content ol { @apply list-decimal pl-5 mb-3; }
+.markdown-content li { @apply mb-1; }
+.markdown-content code { @apply bg-muted px-1 py-0.5 rounded text-xs font-mono; }
+.markdown-content pre { @apply bg-muted rounded-md p-3 mb-3 overflow-x-auto; }
+.markdown-content pre code { @apply bg-transparent p-0 text-xs; }
+.markdown-content blockquote { @apply border-l-2 border-primary/30 pl-3 italic text-muted-foreground mb-3; }
+.markdown-content table { @apply w-full text-xs border-collapse mb-3; }
+.markdown-content th { @apply border bg-muted px-2 py-1 text-left font-medium; }
+.markdown-content td { @apply border px-2 py-1; }
+.markdown-content hr { @apply my-4 border-border; }
+.markdown-content a { @apply text-blue-500 hover:underline; }
+.markdown-content strong { @apply font-semibold; }
+.markdown-content em { @apply italic; }
+.markdown-content img { @apply max-w-full rounded; }
+.markdown-content > *:last-child { @apply mb-0; }
